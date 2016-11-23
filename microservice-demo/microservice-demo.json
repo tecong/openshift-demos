@@ -1,0 +1,435 @@
+{
+  "kind": "Template",
+    "apiVersion": "v1",
+    "metadata": {
+      "name": "demoapp-microservices",
+      "annotations": {
+        "description": "Spring Boot microservice application. There is 2 applications and database",
+        "iconClass": "icon-jboss",
+        "tags": "instant-app,springboot,maven,java,sample,microservices"
+      }
+    },
+    "labels": {
+      "application": "demoapp-microservices",
+      "createdBy": ""
+    },
+    "parameters": [
+    {
+      "description": "The name for the application.",
+      "name": "APPLICATION_NAME_GATEWAY",
+      "value": "demoapp",
+      "displayName": "Application name",
+      "required": true
+    },
+    {
+      "description": "The name for the application.",
+      "name": "APPLICATION_NAME_REPOSITORY",
+      "value": "repository",
+      "displayName": "Application name",
+      "required": true
+    },
+    {
+      "description": "Custom hostname for service routes.  Leave blank for default hostname, e.g.: <application-name>.<project>.<default-domain-suffix>",
+      "name": "APPLICATION_HOSTNAME",
+      "displayName": "Application hostname for web component",
+      "required": true
+    },
+    {
+      "description": "Git source URI for application",
+      "name": "GIT_URI",
+      "value": "https://github.com/tecong/openshift-demos.git"
+    },
+    {
+      "description": "Git branch/tag reference",
+      "name": "GIT_REF",
+      "value": "master"
+    },
+    {
+      "description": "Git Directory for gateway service",
+      "name": "CONTEXT_DIR_GATEWAY",
+      "value": "microservice-demo/demoapp"
+    },
+    {
+      "description": "Git Directory for web service",
+      "name": "CONTEXT_DIR_REPOSITORY",
+      "value": "microservice-demo/repository"
+    },
+    {
+      "description": "Github trigger secret",
+      "name": "GITHUB_TRIGGER_SECRET",
+      "from": "[a-zA-Z0-9]{8}",
+      "generate": "expression"
+    },
+    {
+      "description": "Generic build trigger secret",
+      "name": "GENERIC_TRIGGER_SECRET",
+      "from": "[a-zA-Z0-9]{8}",
+      "generate": "expression"
+    }
+  ],
+    "objects": [
+    {
+      "kind": "BuildConfig",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "${APPLICATION_NAME_GATEWAY}"
+      },
+      "spec": {
+        "triggers": [
+        {
+          "type": "GitHub",
+          "github": {
+            "secret": "${GITHUB_TRIGGER_SECRET}"
+          }
+        },
+        {
+          "type": "Generic",
+          "generic": {
+            "secret": "${GENERIC_TRIGGER_SECRET}"
+          }
+        }
+        ],
+          "source": {
+            "type": "Git",
+            "git": {
+              "uri": "${GIT_URI}",
+              "ref": "${GIT_REF}"
+            },
+            "contextDir": "${CONTEXT_DIR_GATEWAY}"
+          },
+          "strategy": {
+            "type": "Source",
+            "sourceStrategy": {
+              "from": {
+                "kind": "ImageStreamTag",
+                "name": "springboot-sti:latest"
+              },
+              "env": [
+                {
+                  "name": "BUILDER_ARGS",
+                  "value": "package -DskipTests"
+                }
+              ]
+            }
+          },
+          "output": {
+            "to": {
+              "kind": "ImageStreamTag",
+              "name": "${APPLICATION_NAME_GATEWAY}:latest"
+            }
+          },
+          "resources": {}
+      }
+    },
+    {
+      "kind": "BuildConfig",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "${APPLICATION_NAME_REPOSITORY}"
+      },
+      "spec": {
+        "triggers": [
+        {
+          "type": "GitHub",
+          "github": {
+            "secret": "${GITHUB_TRIGGER_SECRET}"
+          }
+        },
+        {
+          "type": "Generic",
+          "generic": {
+            "secret": "${GENERIC_TRIGGER_SECRET}"
+          }
+        },
+        {
+          "type": "ImageChange",
+          "imageChange": {}
+        }
+        ],
+          "source": {
+            "type": "Git",
+            "git": {
+              "uri": "${GIT_URI}",
+              "ref": "${GIT_REF}"
+            },
+            "contextDir": "${CONTEXT_DIR_REPOSITORY}"
+          },
+          "strategy": {
+            "type": "Source",
+            "sourceStrategy": {
+              "from": {
+                "kind": "ImageStreamTag",
+                "name": "springboot-sti:latest"
+              },
+              "env": [
+                {
+                  "name": "BUILDER_ARGS",
+                  "value": "package -DskipTests"
+                }
+              ]
+            }
+          },
+          "output": {
+            "to": {
+              "kind": "ImageStreamTag",
+              "name": "${APPLICATION_NAME_REPOSITORY}:latest"
+            }
+          },
+          "resources": {}
+      }
+    },
+    {
+      "kind": "ImageStream",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "${APPLICATION_NAME_GATEWAY}"
+      },
+      "spec": {
+        "dockerImageRepository": "",
+        "tags": [
+        {
+          "name": "latest"
+        }
+        ]
+      }
+    },
+    {
+      "kind": "ImageStream",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "${APPLICATION_NAME_REPOSITORY}"
+      },
+      "spec": {
+        "dockerImageRepository": "",
+        "tags": [
+        {
+          "name": "latest"
+        }
+        ]
+      }
+    },
+    {
+      "kind": "DeploymentConfig",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "${APPLICATION_NAME_GATEWAY}"
+      },
+      "spec": {
+        "strategy": {
+          "type": "Rolling",
+          "rollingParams": {
+            "updatePeriodSeconds": 1,
+            "intervalSeconds": 1,
+            "timeoutSeconds": 600
+          },
+          "resources": {}
+        },
+        "triggers": [
+        {
+          "type": "ConfigChange"
+        },
+        {
+          "type": "ImageChange",
+          "imageChangeParams": {
+            "automatic": true,
+            "containerNames": [
+              "${APPLICATION_NAME_GATEWAY}"
+              ],
+            "from": {
+              "kind": "ImageStreamTag",
+              "name": "${APPLICATION_NAME_GATEWAY}:latest"
+            }
+          }
+        }
+        ],
+          "replicas": 1,
+          "selector": {
+            "deploymentconfig": "${APPLICATION_NAME_GATEWAY}"
+          },
+          "template": {
+            "metadata": {
+              "labels": {
+                "deploymentconfig": "${APPLICATION_NAME_GATEWAY}"
+              }
+            },
+            "spec": {
+              "containers": [
+              {
+                "name": "${APPLICATION_NAME_GATEWAY}",
+                "image": "${APPLICATION_NAME_GATEWAY}",
+                "ports": [
+                {
+                  "containerPort": 8080,
+                  "protocol": "TCP"
+                }
+                ],
+                  "env": [
+                  {
+                    "name": "joku",
+                    "value": "juttu"
+                  }
+                ],
+                  "livenessProbe": {
+                    "tcpSocket": {
+                      "port": 8080
+                    },
+                    "initialDelaySeconds": 60,
+                    "timeoutSeconds": 1
+                  },
+                  "resources": {},
+                  "terminationMessagePath": "/dev/termination-log",
+                  "imagePullPolicy": "IfNotPresent",
+                  "securityContext": {
+                    "capabilities": {},
+                    "privileged": false
+                  }
+              }
+              ],
+                "restartPolicy": "Always",
+                "dnsPolicy": "ClusterFirst"
+            }
+          }
+      }
+    },
+    {
+      "kind": "DeploymentConfig",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "${APPLICATION_NAME_REPOSITORY}"
+      },
+      "spec": {
+        "strategy": {
+          "type": "Rolling",
+          "rollingParams": {
+            "updatePeriodSeconds": 1,
+            "intervalSeconds": 1,
+            "timeoutSeconds": 600
+          },
+          "resources": {}
+        },
+        "triggers": [
+        {
+          "type": "ConfigChange"
+        },
+        {
+          "type": "ImageChange",
+          "imageChangeParams": {
+            "automatic": true,
+            "containerNames": [
+              "${APPLICATION_NAME_REPOSITORY}"
+              ],
+            "from": {
+              "kind": "ImageStreamTag",
+              "name": "${APPLICATION_NAME_REPOSITORY}:latest"
+            }
+          }
+        }
+        ],
+          "replicas": 1,
+          "selector": {
+            "deploymentconfig": "${APPLICATION_NAME_REPOSITORY}"
+          },
+          "template": {
+            "metadata": {
+              "labels": {
+                "deploymentconfig": "${APPLICATION_NAME_REPOSITORY}"
+              }
+            },
+            "spec": {
+              "containers": [
+              {
+                "name": "${APPLICATION_NAME_REPOSITORY}",
+                "image": "${APPLICATION_NAME_REPOSITORY}",
+                "ports": [
+                {
+                  "containerPort": 8080,
+                  "protocol": "TCP"
+                }
+                ],
+                  "env": [
+                  {
+                    "name": "joku",
+                    "value": "juttu"
+                  }
+                ],
+                  "livenessProbe": {
+                    "tcpSocket": {
+                      "port": 8080
+                    },
+                    "initialDelaySeconds": 60,
+                    "timeoutSeconds": 1
+                  },
+                  "resources": {},
+                  "terminationMessagePath": "/dev/termination-log",
+                  "imagePullPolicy": "IfNotPresent",
+                  "securityContext": {
+                    "capabilities": {},
+                    "privileged": false
+                  }
+              }
+              ],
+                "restartPolicy": "Always",
+                "dnsPolicy": "ClusterFirst"
+            }
+          }
+      }
+    },
+    {
+      "kind": "Route",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "${APPLICATION_NAME_GATEWAY}"
+      },
+      "spec": {
+        "host": "${APPLICATION_HOSTNAME}",
+        "to": {
+          "kind": "Service",
+          "name": "${APPLICATION_NAME_GATEWAY}"
+        }
+      }
+    },
+    {
+      "kind": "Service",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "${APPLICATION_NAME_GATEWAY}"
+      },
+      "spec": {
+        "ports": [
+        {
+          "name": "${APPLICATION_NAME_GATEWAY}",
+          "port": 8080,
+          "targetPort": 8080
+        }
+        ],
+          "selector": {
+            "deploymentconfig": "${APPLICATION_NAME_GATEWAY}"
+          },
+          "type": "ClusterIP",
+          "sessionAffinity": "None"
+      }
+    },
+    {
+      "kind": "Service",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "${APPLICATION_NAME_REPOSITORY}"
+      },
+      "spec": {
+        "ports": [
+        {
+          "name": "${APPLICATION_NAME_REPOSITORY}",
+          "port": 8080,
+          "targetPort": 8080
+        }
+        ],
+          "selector": {
+            "deploymentconfig": "${APPLICATION_NAME_REPOSITORY}"
+          },
+          "type": "ClusterIP",
+          "sessionAffinity": "None"
+      }
+    }
+  ]
+
+}
