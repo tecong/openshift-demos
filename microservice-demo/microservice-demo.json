@@ -69,6 +69,74 @@
   ],
     "objects": [
     {
+      "kind": "Service",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "jhipster-registry",
+        "annotations": {
+          "description": "Jhipster registry for microservice registration"
+        }
+      },
+      "spec": {
+        "ports": [
+          {
+            "name": "web",
+            "port": 8761,
+            "targetPort": 8761
+          }
+        ],
+        "selector": {
+          "name": "jhipster-registry"
+        }
+      }
+    },
+    {
+      "kind": "DeploymentConfig",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "jhipster-registry",
+        "annotations": {
+          "description": "Defines how to deploy the jhipster registry"
+        }
+      },
+      "spec": {
+        "strategy": {
+          "type": "Rolling"
+        },
+        "replicas": 1,
+        "selector": {
+          "name": "jhipster-registry"
+        },
+        "template": {
+          "metadata": {
+            "name": "jhipster-registry",
+            "labels": {
+              "name": "jhipster-registry"
+            }
+          },
+          "spec": {
+            "containers": [
+              {
+                "name": "jhipster-registry",
+                "image": "jhipster/jhipster-registry",
+                "ports": [
+                  {
+                    "containerPort": 8761
+                  }
+                ],
+                "env": [
+                  {
+                    "name": "joku",
+                    "value": "juttu"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
       "kind": "BuildConfig",
       "apiVersion": "v1",
       "metadata": {
@@ -107,7 +175,7 @@
               "env": [
                 {
                   "name": "BUILDER_ARGS",
-                  "value": "package -DskipTests"
+                  "value": "package -Pdev,swagger -DskipTests"
                 }
               ]
             }
@@ -164,7 +232,7 @@
               "env": [
                 {
                   "name": "BUILDER_ARGS",
-                  "value": "package -DskipTests"
+                  "value": "package -Pdev,swagger -DskipTests"
                 }
               ]
             }
@@ -265,9 +333,14 @@
                 ],
                   "env": [
                   {
-                    "name": "joku",
-                    "value": "juttu"
+                    "name": "SPRING_CLOUD_CONFIG_URI",
+                    "value": "http://admin:admin@jhipster-registry:8761/config"
+                  },
+                  {
+                    "name": "SPRING_PROFILES_ACTIVE",
+                    "value": "dev,swagger"
                   }
+
                 ],
                   "livenessProbe": {
                     "tcpSocket": {
@@ -348,8 +421,12 @@
                 ],
                   "env": [
                   {
-                    "name": "joku",
-                    "value": "juttu"
+                    "name": "SPRING_CLOUD_CONFIG_URI",
+                    "value": "http://admin:admin@jhipster-registry:8761/config"
+                  },
+                  {
+                    "name": "SPRING_PROFILES_ACTIVE",
+                    "value": "dev,swagger"
                   }
                 ],
                   "livenessProbe": {
