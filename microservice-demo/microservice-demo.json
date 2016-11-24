@@ -16,16 +16,16 @@
     "parameters": [
     {
       "description": "The name for the application.",
-      "name": "APPLICATION_NAME_GATEWAY",
+      "name": "APPLICATION_NAME",
       "value": "demoapp",
       "displayName": "Application name",
       "required": true
     },
     {
       "description": "The name for the application.",
-      "name": "APPLICATION_NAME_REPOSITORY",
+      "name": "MICROSERVICE_NAME_REPOSITORY",
       "value": "repository",
-      "displayName": "Application name",
+      "displayName": "Microservice name",
       "required": true
     },
     {
@@ -65,14 +65,23 @@
       "name": "GENERIC_TRIGGER_SECRET",
       "from": "[a-zA-Z0-9]{8}",
       "generate": "expression"
+    },
+    {
+    	"description": "Password for eureka registry access",
+    	"name": "EUREKA_PASSWORD",
+    	"required": true,
+    	"displayName": "Password for eureka access"
     }
-  ],
+    ],
     "objects": [
     {
       "kind": "Service",
       "apiVersion": "v1",
       "metadata": {
-        "name": "jhipster-registry",
+        "name": "eureka",
+				"labels": {
+					"app": "${APPLICATION_NAME}"
+				},
         "annotations": {
           "description": "Jhipster registry for microservice registration"
         }
@@ -80,21 +89,22 @@
       "spec": {
         "ports": [
           {
-            "name": "web",
+            "name": "eureka",
             "port": 8761,
             "targetPort": 8761
           }
         ],
         "selector": {
-          "name": "jhipster-registry"
-        }
+          "name": "eureka"
+        },
+        "type": "ClusterIP"
       }
     },
     {
       "kind": "DeploymentConfig",
       "apiVersion": "v1",
       "metadata": {
-        "name": "jhipster-registry",
+        "name": "eureka",
         "annotations": {
           "description": "Defines how to deploy the jhipster registry"
         }
@@ -105,19 +115,19 @@
         },
         "replicas": 1,
         "selector": {
-          "name": "jhipster-registry"
+          "name": "eureka"
         },
         "template": {
           "metadata": {
-            "name": "jhipster-registry",
+            "name": "eureka",
             "labels": {
-              "name": "jhipster-registry"
+              "name": "eureka"
             }
           },
           "spec": {
             "containers": [
               {
-                "name": "jhipster-registry",
+                "name": "eureka",
                 "image": "jhipster/jhipster-registry",
                 "ports": [
                   {
@@ -126,8 +136,20 @@
                 ],
                 "env": [
                   {
-                    "name": "joku",
-                    "value": "juttu"
+                    "name": "SECURITY_USER_PASSWORD",
+                    "value": "${EUREKA_PASSWORD}"
+                  },
+                  {
+                  	"name": "SPRING_PROFILES_ACTIVE",
+                  	"value": "prod"
+                  },
+                  {
+                  	"name": "GIT_URI",
+                  	"value": "https://github.com/tecong/openshift-demos/"
+                  },
+                  {
+                  	"name": "GIT_SEARCH_PATHS",
+                  	"value": "microservice-demo/central-config"
                   }
                 ]
               }
@@ -140,7 +162,7 @@
       "kind": "BuildConfig",
       "apiVersion": "v1",
       "metadata": {
-        "name": "${APPLICATION_NAME_GATEWAY}"
+        "name": "${APPLICATION_NAME}"
       },
       "spec": {
         "triggers": [
@@ -175,7 +197,7 @@
               "env": [
                 {
                   "name": "BUILDER_ARGS",
-                  "value": "package -Pdev,swagger -DskipTests"
+                  "value": "package -Pdev -DskipTests"
                 }
               ]
             }
@@ -183,7 +205,7 @@
           "output": {
             "to": {
               "kind": "ImageStreamTag",
-              "name": "${APPLICATION_NAME_GATEWAY}:latest"
+              "name": "${APPLICATION_NAME}:latest"
             }
           },
           "resources": {}
@@ -193,7 +215,7 @@
       "kind": "BuildConfig",
       "apiVersion": "v1",
       "metadata": {
-        "name": "${APPLICATION_NAME_REPOSITORY}"
+        "name": "${MICROSERVICE_NAME_REPOSITORY}"
       },
       "spec": {
         "triggers": [
@@ -232,7 +254,7 @@
               "env": [
                 {
                   "name": "BUILDER_ARGS",
-                  "value": "package -Pdev,swagger -DskipTests"
+                  "value": "package -Pdev -DskipTests"
                 }
               ]
             }
@@ -240,7 +262,7 @@
           "output": {
             "to": {
               "kind": "ImageStreamTag",
-              "name": "${APPLICATION_NAME_REPOSITORY}:latest"
+              "name": "${MICROSERVICE_NAME_REPOSITORY}:latest"
             }
           },
           "resources": {}
@@ -250,7 +272,7 @@
       "kind": "ImageStream",
       "apiVersion": "v1",
       "metadata": {
-        "name": "${APPLICATION_NAME_GATEWAY}"
+        "name": "${APPLICATION_NAME}"
       },
       "spec": {
         "dockerImageRepository": "",
@@ -265,7 +287,7 @@
       "kind": "ImageStream",
       "apiVersion": "v1",
       "metadata": {
-        "name": "${APPLICATION_NAME_REPOSITORY}"
+        "name": "${MICROSERVICE_NAME_REPOSITORY}"
       },
       "spec": {
         "dockerImageRepository": "",
@@ -280,7 +302,7 @@
       "kind": "DeploymentConfig",
       "apiVersion": "v1",
       "metadata": {
-        "name": "${APPLICATION_NAME_GATEWAY}"
+        "name": "${APPLICATION_NAME}"
       },
       "spec": {
         "strategy": {
@@ -301,30 +323,30 @@
           "imageChangeParams": {
             "automatic": true,
             "containerNames": [
-              "${APPLICATION_NAME_GATEWAY}"
+              "${APPLICATION_NAME}"
               ],
             "from": {
               "kind": "ImageStreamTag",
-              "name": "${APPLICATION_NAME_GATEWAY}:latest"
+              "name": "${APPLICATION_NAME}:latest"
             }
           }
         }
         ],
           "replicas": 1,
           "selector": {
-            "deploymentconfig": "${APPLICATION_NAME_GATEWAY}"
+            "deploymentconfig": "${APPLICATION_NAME}"
           },
           "template": {
             "metadata": {
               "labels": {
-                "deploymentconfig": "${APPLICATION_NAME_GATEWAY}"
+                "deploymentconfig": "${APPLICATION_NAME}"
               }
             },
             "spec": {
               "containers": [
               {
-                "name": "${APPLICATION_NAME_GATEWAY}",
-                "image": "${APPLICATION_NAME_GATEWAY}",
+                "name": "${APPLICATION_NAME}",
+                "image": "${APPLICATION_NAME}",
                 "ports": [
                 {
                   "containerPort": 8080,
@@ -334,13 +356,16 @@
                   "env": [
                   {
                     "name": "SPRING_CLOUD_CONFIG_URI",
-                    "value": "http://admin:admin@jhipster-registry:8761/config"
+                    "value": "http://admin:${EUREKA_PASSWORD}@eureka:8761/config"
                   },
                   {
                     "name": "SPRING_PROFILES_ACTIVE",
                     "value": "dev,swagger"
+                  },
+                  {
+                  	"name": "EUREKA_CLIENT_SERVICEURL_DEFAULTZONE",
+                  	"value": "http://admin:${EUREKA_PASSWORD}@eureka:8761/eureka"
                   }
-
                 ],
                   "livenessProbe": {
                     "tcpSocket": {
@@ -368,7 +393,7 @@
       "kind": "DeploymentConfig",
       "apiVersion": "v1",
       "metadata": {
-        "name": "${APPLICATION_NAME_REPOSITORY}"
+        "name": "${MICROSERVICE_NAME_REPOSITORY}"
       },
       "spec": {
         "strategy": {
@@ -389,49 +414,53 @@
           "imageChangeParams": {
             "automatic": true,
             "containerNames": [
-              "${APPLICATION_NAME_REPOSITORY}"
+              "${MICROSERVICE_NAME_REPOSITORY}"
               ],
             "from": {
               "kind": "ImageStreamTag",
-              "name": "${APPLICATION_NAME_REPOSITORY}:latest"
+              "name": "${MICROSERVICE_NAME_REPOSITORY}:latest"
             }
           }
         }
         ],
           "replicas": 1,
           "selector": {
-            "deploymentconfig": "${APPLICATION_NAME_REPOSITORY}"
+            "deploymentconfig": "${MICROSERVICE_NAME_REPOSITORY}"
           },
           "template": {
             "metadata": {
               "labels": {
-                "deploymentconfig": "${APPLICATION_NAME_REPOSITORY}"
+                "deploymentconfig": "${MICROSERVICE_NAME_REPOSITORY}"
               }
             },
             "spec": {
               "containers": [
               {
-                "name": "${APPLICATION_NAME_REPOSITORY}",
-                "image": "${APPLICATION_NAME_REPOSITORY}",
+                "name": "${MICROSERVICE_NAME_REPOSITORY}",
+                "image": "${MICROSERVICE_NAME_REPOSITORY}",
                 "ports": [
                 {
-                  "containerPort": 8080,
+                  "containerPort": 8081,
                   "protocol": "TCP"
                 }
                 ],
                   "env": [
                   {
                     "name": "SPRING_CLOUD_CONFIG_URI",
-                    "value": "http://admin:admin@jhipster-registry:8761/config"
+                    "value": "http://admin:${EUREKA_PASSWORD}@eureka:8761/config"
                   },
                   {
                     "name": "SPRING_PROFILES_ACTIVE",
                     "value": "dev,swagger"
+                  },
+                  {
+                  	"name": "EUREKA_CLIENT_SERVICEURL_DEFAULTZONE",
+                  	"value": "http://admin:${EUREKA_PASSWORD}@eureka:8761/eureka"
                   }
                 ],
                   "livenessProbe": {
                     "tcpSocket": {
-                      "port": 8080
+                      "port": 8081
                     },
                     "initialDelaySeconds": 60,
                     "timeoutSeconds": 1
@@ -455,13 +484,13 @@
       "kind": "Route",
       "apiVersion": "v1",
       "metadata": {
-        "name": "${APPLICATION_NAME_GATEWAY}"
+        "name": "${APPLICATION_NAME}"
       },
       "spec": {
         "host": "${APPLICATION_HOSTNAME}",
         "to": {
           "kind": "Service",
-          "name": "${APPLICATION_NAME_GATEWAY}"
+          "name": "${APPLICATION_NAME}"
         }
       }
     },
@@ -469,18 +498,18 @@
       "kind": "Service",
       "apiVersion": "v1",
       "metadata": {
-        "name": "${APPLICATION_NAME_GATEWAY}"
+        "name": "${APPLICATION_NAME}"
       },
       "spec": {
         "ports": [
         {
-          "name": "${APPLICATION_NAME_GATEWAY}",
+          "name": "${APPLICATION_NAME}",
           "port": 8080,
           "targetPort": 8080
         }
         ],
           "selector": {
-            "deploymentconfig": "${APPLICATION_NAME_GATEWAY}"
+            "deploymentconfig": "${APPLICATION_NAME}"
           },
           "type": "ClusterIP",
           "sessionAffinity": "None"
@@ -490,18 +519,18 @@
       "kind": "Service",
       "apiVersion": "v1",
       "metadata": {
-        "name": "${APPLICATION_NAME_REPOSITORY}"
+        "name": "${MICROSERVICE_NAME_REPOSITORY}"
       },
       "spec": {
         "ports": [
         {
-          "name": "${APPLICATION_NAME_REPOSITORY}",
-          "port": 8080,
-          "targetPort": 8080
+          "name": "${MICROSERVICE_NAME_REPOSITORY}",
+          "port": 8081,
+          "targetPort": 8081
         }
         ],
           "selector": {
-            "deploymentconfig": "${APPLICATION_NAME_REPOSITORY}"
+            "deploymentconfig": "${MICROSERVICE_NAME_REPOSITORY}"
           },
           "type": "ClusterIP",
           "sessionAffinity": "None"
