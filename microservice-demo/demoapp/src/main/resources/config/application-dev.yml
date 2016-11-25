@@ -63,13 +63,6 @@ spring:
             keyspaceName: demoapp
             repositories:
                 enabled: false
-        elasticsearch:
-            cluster-name:
-            cluster-nodes:
-            properties:
-                path:
-                  logs: target/elasticsearch/log
-                  data: target/elasticsearch/data
     mail:
         host: localhost
         port: 25

@@ -55,9 +55,6 @@ spring:
             keyspaceName: demoapp
             repositories:
                 enabled: false
-        elasticsearch:
-            cluster-name:
-            cluster-nodes: localhost:9300
     mail:
         host: localhost
         port: 25

@@ -11,7 +11,6 @@ services:
             - demoapp-mariadb:mariadb
             # Uncomment to have Cassandra working with the gateway
             # - demoapp-cassandra:cassandra
-            - demoapp-elasticsearch:elasticsearch
             - jhipster-registry:registry
         environment:
             - SPRING_PROFILES_ACTIVE=prod,swagger
@@ -19,7 +18,6 @@ services:
             - SPRING_DATASOURCE_URL=jdbc:mariadb://mariadb:3306/demoapp
             - SPRING_DATA_CASSANDRA_CONTACTPOINTS=cassandra
             - JHIPSTER_SLEEP=30 # gives time for the cassandra cluster to start and execute the migration scripts
-            - SPRING_DATA_ELASTICSEARCH_CLUSTER_NODES=elasticsearch:9300
         ports:
             - 8080:8080
     demoapp-mariadb:
@@ -37,10 +35,6 @@ services:
     #         service: demoapp-cassandra-migration
     #     environment:
     #         - CREATE_KEYSPACE_SCRIPT=create-keyspace-prod.cql
-    demoapp-elasticsearch:
-        extends:
-            file: elasticsearch.yml
-            service: demoapp-elasticsearch
     jhipster-registry:
         extends:
             file: jhipster-registry.yml
