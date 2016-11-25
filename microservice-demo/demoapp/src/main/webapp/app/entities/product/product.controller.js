@@ -5,9 +5,9 @@
         .module('demoappApp')
         .controller('ProductController', ProductController);
 
-    ProductController.$inject = ['$scope', '$state', 'Product', 'ProductSearch', 'ParseLinks', 'AlertService'];
+    ProductController.$inject = ['$scope', '$state', 'Product', 'ParseLinks', 'AlertService'];
 
-    function ProductController ($scope, $state, Product, ProductSearch, ParseLinks, AlertService) {
+    function ProductController ($scope, $state, Product, ParseLinks, AlertService) {
         var vm = this;
 
         vm.products = [];
@@ -19,27 +19,15 @@
         vm.predicate = 'id';
         vm.reset = reset;
         vm.reverse = true;
-        vm.clear = clear;
-        vm.loadAll = loadAll;
-        vm.search = search;
 
         loadAll();
 
         function loadAll () {
-            if (vm.currentSearch) {
-                ProductSearch.query({
-                    query: vm.currentSearch,
-                    page: vm.page,
-                    size: 20,
-                    sort: sort()
-                }, onSuccess, onError);
-            } else {
-                Product.query({
-                    page: vm.page,
-                    size: 20,
-                    sort: sort()
-                }, onSuccess, onError);
-            }
+            Product.query({
+                page: vm.page,
+                size: 20,
+                sort: sort()
+            }, onSuccess, onError);
             function sort() {
                 var result = [vm.predicate + ',' + (vm.reverse ? 'asc' : 'desc')];
                 if (vm.predicate !== 'id') {
@@ -70,34 +58,6 @@
         function loadPage(page) {
             vm.page = page;
             loadAll();
-        }
-
-        function clear () {
-            vm.products = [];
-            vm.links = {
-                last: 0
-            };
-            vm.page = 0;
-            vm.predicate = 'id';
-            vm.reverse = true;
-            vm.searchQuery = null;
-            vm.currentSearch = null;
-            vm.loadAll();
-        }
-
-        function search (searchQuery) {
-            if (!searchQuery){
-                return vm.clear();
-            }
-            vm.products = [];
-            vm.links = {
-                last: 0
-            };
-            vm.page = 0;
-            vm.predicate = '_score';
-            vm.reverse = false;
-            vm.currentSearch = searchQuery;
-            vm.loadAll();
         }
     }
 })();

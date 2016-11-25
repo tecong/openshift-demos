@@ -3,7 +3,6 @@ package com.tieto.teco.openshiftdemos.microservicedemo.repository.service.impl;
 import com.tieto.teco.openshiftdemos.microservicedemo.repository.service.ProductService;
 import com.tieto.teco.openshiftdemos.microservicedemo.repository.domain.Product;
 import com.tieto.teco.openshiftdemos.microservicedemo.repository.repository.ProductRepository;
-import com.tieto.teco.openshiftdemos.microservicedemo.repository.repository.search.ProductSearchRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -13,10 +12,6 @@ import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
-
-import static org.elasticsearch.index.query.QueryBuilders.*;
 
 /**
  * Service Implementation for managing Product.
@@ -30,9 +25,6 @@ public class ProductServiceImpl implements ProductService{
     @Inject
     private ProductRepository productRepository;
 
-    @Inject
-    private ProductSearchRepository productSearchRepository;
-
     /**
      * Save a product.
      *
@@ -42,7 +34,6 @@ public class ProductServiceImpl implements ProductService{
     public Product save(Product product) {
         log.debug("Request to save Product : {}", product);
         Product result = productRepository.save(product);
-        productSearchRepository.save(result);
         return result;
     }
 
@@ -80,19 +71,5 @@ public class ProductServiceImpl implements ProductService{
     public void delete(Long id) {
         log.debug("Request to delete Product : {}", id);
         productRepository.delete(id);
-        productSearchRepository.delete(id);
-    }
-
-    /**
-     * Search for the product corresponding to the query.
-     *
-     *  @param query the query of the search
-     *  @return the list of entities
-     */
-    @Transactional(readOnly = true)
-    public Page<Product> search(String query, Pageable pageable) {
-        log.debug("Request to search for a page of Products for query {}", query);
-        Page<Product> result = productSearchRepository.search(queryStringQuery(query), pageable);
-        return result;
     }
 }

@@ -21,11 +21,11 @@
             ]
         }
     ],
-    "changelogDate": "20161123083706",
+    "changelogDate": "20161125073404",
     "dto": "no",
     "service": "serviceImpl",
     "entityTableName": "product",
     "pagination": "infinite-scroll",
     "microserviceName": "repository",
-    "searchEngine": "elasticsearch"
+    "searchEngine": false
 }

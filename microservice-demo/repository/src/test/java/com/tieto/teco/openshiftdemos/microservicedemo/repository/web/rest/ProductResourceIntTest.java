@@ -5,7 +5,6 @@ import com.tieto.teco.openshiftdemos.microservicedemo.repository.RepositoryApp;
 import com.tieto.teco.openshiftdemos.microservicedemo.repository.domain.Product;
 import com.tieto.teco.openshiftdemos.microservicedemo.repository.repository.ProductRepository;
 import com.tieto.teco.openshiftdemos.microservicedemo.repository.service.ProductService;
-import com.tieto.teco.openshiftdemos.microservicedemo.repository.repository.search.ProductSearchRepository;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -55,9 +54,6 @@ public class ProductResourceIntTest {
     private ProductService productService;
 
     @Inject
-    private ProductSearchRepository productSearchRepository;
-
-    @Inject
     private MappingJackson2HttpMessageConverter jacksonMessageConverter;
 
     @Inject
@@ -96,7 +92,6 @@ public class ProductResourceIntTest {
 
     @Before
     public void initTest() {
-        productSearchRepository.deleteAll();
         product = createEntity(em);
     }
 
@@ -119,10 +114,6 @@ public class ProductResourceIntTest {
         assertThat(testProduct.getName()).isEqualTo(DEFAULT_NAME);
         assertThat(testProduct.getDescription()).isEqualTo(DEFAULT_DESCRIPTION);
         assertThat(testProduct.getPrice()).isEqualTo(DEFAULT_PRICE);
-
-        // Validate the Product in ElasticSearch
-        Product productEs = productSearchRepository.findOne(testProduct.getId());
-        assertThat(productEs).isEqualToComparingFieldByField(testProduct);
     }
 
     @Test
@@ -228,10 +219,6 @@ public class ProductResourceIntTest {
         assertThat(testProduct.getName()).isEqualTo(UPDATED_NAME);
         assertThat(testProduct.getDescription()).isEqualTo(UPDATED_DESCRIPTION);
         assertThat(testProduct.getPrice()).isEqualTo(UPDATED_PRICE);
-
-        // Validate the Product in ElasticSearch
-        Product productEs = productSearchRepository.findOne(testProduct.getId());
-        assertThat(productEs).isEqualToComparingFieldByField(testProduct);
     }
 
     @Test
@@ -247,28 +234,8 @@ public class ProductResourceIntTest {
                 .accept(TestUtil.APPLICATION_JSON_UTF8))
                 .andExpect(status().isOk());
 
-        // Validate ElasticSearch is empty
-        boolean productExistsInEs = productSearchRepository.exists(product.getId());
-        assertThat(productExistsInEs).isFalse();
-
         // Validate the database is empty
         List<Product> products = productRepository.findAll();
         assertThat(products).hasSize(databaseSizeBeforeDelete - 1);
-    }
-
-    @Test
-    @Transactional
-    public void searchProduct() throws Exception {
-        // Initialize the database
-        productService.save(product);
-
-        // Search the product
-        restProductMockMvc.perform(get("/api/_search/products?query=id:" + product.getId()))
-            .andExpect(status().isOk())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
-            .andExpect(jsonPath("$.[*].id").value(hasItem(product.getId().intValue())))
-            .andExpect(jsonPath("$.[*].name").value(hasItem(DEFAULT_NAME.toString())))
-            .andExpect(jsonPath("$.[*].description").value(hasItem(DEFAULT_DESCRIPTION.toString())))
-            .andExpect(jsonPath("$.[*].price").value(hasItem(DEFAULT_PRICE.doubleValue())));
     }
 }
