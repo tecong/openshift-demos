@@ -1,0 +1,92 @@
+node {
+    // uncomment these 2 lines and edit the name 'node-4.6.0' according to what you choose in configuration
+    // def nodeHome = tool name: 'node-4.6.0', type: 'jenkins.plugins.nodejs.tools.NodeJSInstallation'
+    // env.PATH = "${nodeHome}/bin:${env.PATH}"
+
+    gitCommit = "${env.GIT_COMMIT}"
+
+    echo gitCommit
+
+    stage('check tools') {
+        sh "node -v"
+        sh "npm -v"
+        sh "bower -v"
+        sh "gulp -v"
+    }
+
+    stage('checkout') {
+        checkout scm
+    }
+
+    stage('npm install ') {
+        dir('microservice-demo/demoapp') {
+          sh "npm install"
+        }
+    }
+
+    stage('clean') {
+      parallel(demoapp: {
+        dir('microservice-demo/demoapp') {
+          sh "./mvnw clean"
+        }
+      }, registry: {
+        dir(microservice-demo/registry') {
+          sh "./mvnw clean"
+        }
+      })
+    }
+
+    stage('backend tests') {
+      parallel(demoapp: {
+        dir('microservice-demo/demoapp') {
+          sh "./mvnw test"
+        }
+      }, registry: {
+        dir(microservice-demo/registry') {
+          sh "./mvnw test"
+        }
+      })
+    }
+
+    stage('frontend tests') {
+        dir('microservice-demo/demoapp') {
+          sh "gulp test"
+        }
+    }
+
+    stage('packaging') {
+      parallel(demoapp: {
+        dir('microservice-demo/demoapp') {
+          sh "./mvnw package -Pprod -DskipTests"
+        }
+      }, registry: {
+        dir(microservice-demo/registry') {
+          sh "./mvnw package -Pprod -DskipTests"
+        }
+      })
+    }
+
+    stage('Install to test') {
+      parallel(demoapp: {
+        dir('microservice-demo/demoapp') {
+          docker.withRegistry('https://docker-registry-default.cloudapps.demo.tecdomain.net', 'openshift') {
+            docker.withServer('tcp://127.0.0.1:4243') {
+              def newDemoApp = docker.build "microservice/demoapp:${env.GIT_COMMIT}"
+              newDemoApp.push()
+              newDemoApp.push 'latest'
+            }
+          }
+        }
+      }, registry: {
+        dir(microservice-demo/registry') {
+          docker.withRegistry('https://docker-registry-default.cloudapps.demo.tecdomain.net', 'openshift') {
+            docker.withServer('tcp://127.0.0.1:4243') {
+              def newRegistryApp = docker.build "microservice/registry:${env.GIT_COMMIT}"
+              newRegistryApp.push()
+              newRegistryApp.push 'latest'
+            }
+          }
+        }
+      })
+   }
+}
