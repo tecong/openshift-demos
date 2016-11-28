@@ -34,7 +34,7 @@ node {
         sh "./mvnw package -Pprod -DskipTests"
     }
 
-    stage('Test') {
+    stage('Test') 
       parallel(demoapp: {
         dir('microservice-demo/demoapp') {
           docker.withRegistry('https://docker-registry-default.cloudapps.demo.tecdomain.net:5000'. 'microservice') {
@@ -44,5 +44,5 @@ node {
           }
         }
       }
-    }
+    
 }
