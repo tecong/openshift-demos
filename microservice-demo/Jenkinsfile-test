@@ -30,7 +30,7 @@ node {
           sh "./mvnw clean"
         }
       }, registry: {
-        dir(microservice-demo/registry') {
+        dir('microservice-demo/registry') {
           sh "./mvnw clean"
         }
       })
@@ -42,7 +42,7 @@ node {
           sh "./mvnw test"
         }
       }, registry: {
-        dir(microservice-demo/registry') {
+        dir('microservice-demo/registry') {
           sh "./mvnw test"
         }
       })
@@ -60,7 +60,7 @@ node {
           sh "./mvnw package -Pprod -DskipTests"
         }
       }, registry: {
-        dir(microservice-demo/registry') {
+        dir('microservice-demo/registry') {
           sh "./mvnw package -Pprod -DskipTests"
         }
       })
@@ -78,7 +78,7 @@ node {
           }
         }
       }, registry: {
-        dir(microservice-demo/registry') {
+        dir('microservice-demo/registry') {
           docker.withRegistry('https://docker-registry-default.cloudapps.demo.tecdomain.net', 'openshift') {
             docker.withServer('tcp://127.0.0.1:4243') {
               def newRegistryApp = docker.build "microservice/registry:${env.GIT_COMMIT}"
