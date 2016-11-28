@@ -64,7 +64,6 @@ node {
     }
 
     stage('Install to test') {
-      parallel(demoapp: {
         dir('microservice-demo/demoapp') {
           docker.withRegistry('https://docker-repository-default.cloudapps.demo.tecdomain.net', 'openshift') {
             docker.withServer('tcp://127.0.0.1:4243') {
@@ -74,7 +73,6 @@ node {
             }
           }
         }
-      }, repository: {
         dir('microservice-demo/repository') {
           docker.withRegistry('https://docker-repository-default.cloudapps.demo.tecdomain.net', 'openshift') {
             docker.withServer('tcp://127.0.0.1:4243') {
@@ -84,6 +82,5 @@ node {
             }
           }
         }
-      })
    }
 }
