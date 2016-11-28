@@ -590,7 +590,7 @@
                             </excludes>
                         </configuration>
                     </execution>
-                    <execution>
+                 <!--   <execution>
                         <id>without-cucumber</id>
                         <goals>
                             <goal>test</goal>
@@ -600,7 +600,7 @@
                               <include>**/*Cucumber*.java</include>
                             </includes>
                         </configuration>
-                    </execution>
+                    </execution> -->
                 </executions>
                 <configuration>
                     <!-- Force alphabetical order to have a reproducible build -->

@@ -36,17 +36,18 @@ node {
       })
     }
 
-    stage('backend tests') {
-      parallel(demoapp: {
+    stage('backend tests demoapp') {
         dir('microservice-demo/demoapp') {
           sh "./mvnw test"
         }
-      }, repository: {
+    }
+
+    stage('backend tests repository-microservice') {
         dir('microservice-demo/repository') {
           sh "./mvnw test"
         }
-      })
     }
+
 
     stage('frontend tests') {
         dir('microservice-demo/demoapp') {
