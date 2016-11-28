@@ -42,15 +42,15 @@ node {
         }
     }
 
-    stage('Test') 
+    stage('Test') {
       parallel(demoapp: {
         dir('microservice-demo/demoapp') {
-          docker.withRegistry('https://docker-registry-default.cloudapps.demo.tecdomain.net:5000'. 'microservice') {
+          docker.withRegistry('https://docker-registry-default.cloudapps.demo.tecdomain.net', 'openshift') {
             docker.withServer('tcp://127.0l0.1:4243') {
-              docker.build('testi/demoapp').push('latest')
+              docker.build('microservice/demoapp').push('latest')
             }
           }
         }
       })
-    
+   }
 }
