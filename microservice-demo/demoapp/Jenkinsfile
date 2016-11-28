@@ -19,19 +19,27 @@ node {
     }
 
     stage('clean') {
-        sh "./mvnw clean"
+        dir('microservice-demo/demoapp') {
+          sh "./mvnw clean"
+        }
     }
 
     stage('backend tests') {
-        sh "./mvnw test"
+        dir('microservice-demo/demoapp') {
+          sh "./mvnw test"
+        }
     }
 
     stage('frontend tests') {
-        sh "gulp test"
+        dir('microservice-demo/demoapp') {
+          sh "gulp test"
+        }
     }
 
     stage('packaging') {
-        sh "./mvnw package -Pprod -DskipTests"
+        dir('microservice-demo/demoapp') {
+          sh "./mvnw package -Pprod -DskipTests"
+        }
     }
 
     stage('Test') 
