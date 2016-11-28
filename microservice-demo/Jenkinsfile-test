@@ -29,8 +29,8 @@ node {
         dir('microservice-demo/demoapp') {
           sh "./mvnw clean"
         }
-      }, registry: {
-        dir('microservice-demo/registry') {
+      }, repository: {
+        dir('microservice-demo/repository') {
           sh "./mvnw clean"
         }
       })
@@ -41,8 +41,8 @@ node {
         dir('microservice-demo/demoapp') {
           sh "./mvnw test"
         }
-      }, registry: {
-        dir('microservice-demo/registry') {
+      }, repository: {
+        dir('microservice-demo/repository') {
           sh "./mvnw test"
         }
       })
@@ -59,8 +59,8 @@ node {
         dir('microservice-demo/demoapp') {
           sh "./mvnw package -Pprod -DskipTests"
         }
-      }, registry: {
-        dir('microservice-demo/registry') {
+      }, repository: {
+        dir('microservice-demo/repository') {
           sh "./mvnw package -Pprod -DskipTests"
         }
       })
@@ -69,7 +69,7 @@ node {
     stage('Install to test') {
       parallel(demoapp: {
         dir('microservice-demo/demoapp') {
-          docker.withRegistry('https://docker-registry-default.cloudapps.demo.tecdomain.net', 'openshift') {
+          docker.withRegistry('https://docker-repository-default.cloudapps.demo.tecdomain.net', 'openshift') {
             docker.withServer('tcp://127.0.0.1:4243') {
               def newDemoApp = docker.build "microservice/demoapp:${env.GIT_COMMIT}"
               newDemoApp.push()
@@ -77,13 +77,13 @@ node {
             }
           }
         }
-      }, registry: {
-        dir('microservice-demo/registry') {
-          docker.withRegistry('https://docker-registry-default.cloudapps.demo.tecdomain.net', 'openshift') {
+      }, repository: {
+        dir('microservice-demo/repository') {
+          docker.withRegistry('https://docker-repository-default.cloudapps.demo.tecdomain.net', 'openshift') {
             docker.withServer('tcp://127.0.0.1:4243') {
-              def newRegistryApp = docker.build "microservice/registry:${env.GIT_COMMIT}"
-              newRegistryApp.push()
-              newRegistryApp.push 'latest'
+              def newRepositoryApp = docker.build "microservice/repository:${env.GIT_COMMIT}"
+              newRepositoryApp.push()
+              newRepositoryApp.push 'latest'
             }
           }
         }
