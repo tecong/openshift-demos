@@ -46,7 +46,7 @@ node {
       parallel(demoapp: {
         dir('microservice-demo/demoapp') {
           docker.withRegistry('https://docker-registry-default.cloudapps.demo.tecdomain.net', 'openshift') {
-            docker.withServer('tcp://127.0l0.1:4243') {
+            docker.withServer('tcp://127.0.0.1:4243') {
               docker.build('microservice/demoapp').push('latest')
             }
           }
