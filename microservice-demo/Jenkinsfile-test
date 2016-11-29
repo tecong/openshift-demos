@@ -66,18 +66,18 @@ node {
     stage('Install to test') {
         input message: 'Do you want to install this build to test env?', ok: 'Install to test'
         dir('microservice-demo/demoapp') {
-          docker.withRegistry('https://docker-registry-default.cloudapps.demo.tecdomain.net', 'openshift') {
+          docker.withRegistry('https://docker-registry-default.cloudapps.demo.tecdomain.net', 'megapusher') {
             docker.withServer('tcp://127.0.0.1:4243') {
-              def newDemoApp = docker.build "microservice/demoapp:${env.BUILD_TAG}"
+              def newDemoApp = docker.build "demoapp-test/demoapp:${env.BUILD_TAG}"
               newDemoApp.push()
               newDemoApp.push 'latest'
             }
           }
         }
         dir('microservice-demo/repository') {
-          docker.withRegistry('https://docker-registry-default.cloudapps.demo.tecdomain.net', 'openshift') {
+          docker.withRegistry('https://docker-registry-default.cloudapps.demo.tecdomain.net', 'megapusher') {
             docker.withServer('tcp://127.0.0.1:4243') {
-              def newRepositoryApp = docker.build "microservice/repository:${env.BUILD_TAG}"
+              def newRepositoryApp = docker.build "demoapp-test/repository:${env.BUILD_TAG}"
               newRepositoryApp.push()
               newRepositoryApp.push 'latest'
             }
