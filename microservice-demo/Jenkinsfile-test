@@ -64,6 +64,7 @@ node {
     }
 
     stage('Install to test') {
+        input message: 'Do you want to install this build to test env?', ok: 'Install to test'
         dir('microservice-demo/demoapp') {
           docker.withRegistry('https://docker-registry-default.cloudapps.demo.tecdomain.net', 'openshift') {
             docker.withServer('tcp://127.0.0.1:4243') {
