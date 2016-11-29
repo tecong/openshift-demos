@@ -65,7 +65,7 @@ node {
 
     stage('Install to test') {
         dir('microservice-demo/demoapp') {
-          docker.withRegistry('https://docker-repository-default.cloudapps.demo.tecdomain.net', 'openshift') {
+          docker.withRegistry('https://docker-registry-default.cloudapps.demo.tecdomain.net', 'openshift') {
             docker.withServer('tcp://127.0.0.1:4243') {
               def newDemoApp = docker.build "microservice/demoapp:${env.BUILD_TAG}"
               newDemoApp.push()
@@ -74,7 +74,7 @@ node {
           }
         }
         dir('microservice-demo/repository') {
-          docker.withRegistry('https://docker-repository-default.cloudapps.demo.tecdomain.net', 'openshift') {
+          docker.withRegistry('https://docker-registry-default.cloudapps.demo.tecdomain.net', 'openshift') {
             docker.withServer('tcp://127.0.0.1:4243') {
               def newRepositoryApp = docker.build "microservice/repository:${env.BUILD_TAG}"
               newRepositoryApp.push()
