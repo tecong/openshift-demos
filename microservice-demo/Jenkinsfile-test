@@ -101,7 +101,7 @@ node {
     }
   }
 
-  stage(Install to prod') {
+  stage('Install to prod') {
     input message: 'Do you want to install this build to prod env?', ok: 'Install to prod'
     docker.withRegistry('https://docker-registry-default.cloudapps.demo.tecdomain.net', 'demoapp-test') {
       docker.withServer('tcp://127.0.0.1:4243') {
