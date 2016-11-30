@@ -45,6 +45,18 @@
     	"name": "EUREKA_PASSWORD",
     	"required": true,
     	"displayName": "Password for eureka access"
+    },
+    {
+      "description": "ImageStream name",
+      "name": "IMAGESTREAM_NAME",
+      "required": true,
+      "displayName": "ImageStream to use"
+    },
+    {
+      "description": "Image tag",
+      "name", "IMAGE_TAG",
+      "required": true,
+      "displayName": "Image tag to use"
     }
     ],
     "objects": [
@@ -191,7 +203,8 @@
               ],
             "from": {
               "kind": "ImageStreamTag",
-              "name": "${APPLICATION_NAME}:test"
+              "name": "${APPLICATION_NAME}:${IMAGE_TAG}",
+              "namespace": "${IMAGESTREAM_NAME}"
             }
           }
         }
@@ -275,7 +288,8 @@
               ],
             "from": {
               "kind": "ImageStreamTag",
-              "name": "${MICROSERVICE_NAME_REPOSITORY}:test"
+              "name": "${MICROSERVICE_NAME_REPOSITORY}:${IMAGE_TAG}",
+              "namespace": "${IMAGESTREAM_NAME}"
             }
           }
         }

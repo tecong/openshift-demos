@@ -94,7 +94,7 @@ node {
     input message: 'Do you want to install this build to UAT env?', ok: 'Install to UAT'
     docker.withRegistry('https://docker-registry-default.cloudapps.demo.tecdomain.net', 'demoapp-test') {
       docker.withServer('tcp://127.0.0.1:4243') {
-        def testimage = docker.image("demoapp-test/repository:${env.BUILD_TAG}")
+        def testimage = docker.image("demoapp-test/demoapp:${env.BUILD_TAG}")
         testimage.push 'uat'
         testimage = docker.image("demoapp-test/repository:${env.BUILD_TAG}")
         testimage.push 'uat'
