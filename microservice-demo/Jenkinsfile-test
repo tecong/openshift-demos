@@ -32,14 +32,14 @@ node {
       })
     }
 
-    stage('backend tests demoapp') {
+    stage('backend unit tests demoapp') {
         dir('microservice-demo/demoapp') {
           sh "./mvnw test"
           junit 'target/surefire-reports/*.xml'
         }
     }
 
-    stage('backend tests repository-microservice') {
+    stage('backend unit tests repository-microservice') {
         dir('microservice-demo/repository') {
           sh "./mvnw test"
           junit 'target/surefire-reports/*.xml'
@@ -47,7 +47,7 @@ node {
     }
 
 
-    stage('frontend tests') {
+    stage('frontend unit tests') {
         dir('microservice-demo/demoapp') {
           sh "gulp test"
           junit 'target/test-results/karma/*.xml'
@@ -67,7 +67,6 @@ node {
     }
 
     stage('Install to test') {
-        input message: 'Do you want to install this build to test env?', ok: 'Install to test'
         dir('microservice-demo/demoapp') {
           docker.withRegistry('https://docker-registry-default.cloudapps.demo.tecdomain.net', 'demoapp-test') {
             docker.withServer('tcp://127.0.0.1:4243') {
@@ -98,6 +97,18 @@ node {
         testimage.push 'uat'
         testimage = docker.image("demoapp-test/repository:${env.BUILD_TAG}")
         testimage.push 'uat'
+      }
+    }
+  }
+
+  stage(Install to prod') {
+    input message: 'Do you want to install this build to prod env?', ok: 'Install to prod'
+    docker.withRegistry('https://docker-registry-default.cloudapps.demo.tecdomain.net', 'demoapp-test') {
+      docker.withServer('tcp://127.0.0.1:4243') {
+        def testimage = docker.image("demoapp-test/demoapp:${env.BUILD_TAG}")
+        testimage.push 'prod'
+        testimage = docker.image("demoapp-test/repository:${env.BUILD_TAG}")
+        testimage.push 'prod'
       }
     }
   }
