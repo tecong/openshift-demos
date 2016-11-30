@@ -35,12 +35,14 @@ node {
     stage('backend tests demoapp') {
         dir('microservice-demo/demoapp') {
           sh "./mvnw test"
+          junit 'target/surefire-reports/*.xml'
         }
     }
 
     stage('backend tests repository-microservice') {
         dir('microservice-demo/repository') {
           sh "./mvnw test"
+          junit 'target/surefire-reports/*.xml'
         }
     }
 
@@ -48,6 +50,7 @@ node {
     stage('frontend tests') {
         dir('microservice-demo/demoapp') {
           sh "gulp test"
+          junit 'target/test-results/karma/*.xml'
         }
     }
 
