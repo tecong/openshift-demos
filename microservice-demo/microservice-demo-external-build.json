@@ -54,7 +54,7 @@
     },
     {
       "description": "Image tag",
-      "name", "IMAGE_TAG",
+      "name": "IMAGE_TAG",
       "required": true,
       "displayName": "Image tag to use"
     }
