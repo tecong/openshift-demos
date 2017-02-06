@@ -27,8 +27,10 @@ Xvfb ${DISPLAY} -ac -screen 0 ${RES} +extension RANDR &
 export DISPLAY=${DISPLAY}
 
 # Creating output directory
-if [ "${ROBOT_OUTPUT_DIRECTORY}" ]; then
+if [ ! -d "${ROBOT_OUTPUT_DIRECTORY}" ]; then
    mkdir -p ${ROBOT_OUTPUT_DIRECTORY}
+else
+	rm -rf ${ROBOT_OUTPUT_DIRECTORY}/*
 fi 
 
 # Execute tests

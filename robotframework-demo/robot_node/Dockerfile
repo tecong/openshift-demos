@@ -49,9 +49,10 @@ RUN mkdir -p /opt/selenium \
 #==============
 RUN apt-get update -qqy \
   && apt-get -qqy install \
-    xvfb \
-  && rm -rf /var/lib/apt/lists/*
-
+    xvfb x11vnc \
+  && rm -rf /var/lib/apt/lists/* \
+  && mkdir ~/.vnc/ && x11vnc -storepasswd 123456 ~/.vnc/passwd
+  
 #===============
 # Google Chrome
 #===============
@@ -99,5 +100,8 @@ RUN pip install robotframework-pabot==0.23
 
 ADD run.sh /usr/local/bin/run.sh
 RUN chmod +x /usr/local/bin/run.sh
+
+VOLUME /robot
+
 
 CMD ["run.sh"]
