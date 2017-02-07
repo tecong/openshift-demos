@@ -36,6 +36,7 @@ fi
 # Execute tests
 echo -e "Executing robot tests at log level ${LOG_LEVEL}"
 
+ls -la /robot
 pybot --loglevel ${LOG_LEVEL} -d ${ROBOT_OUTPUT_DIRECTORY} ${ROBOT_TESTS}
 
 # Stop Xvfb
