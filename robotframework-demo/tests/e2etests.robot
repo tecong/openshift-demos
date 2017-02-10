@@ -22,7 +22,7 @@ Open Page
     [Documentation]    Opens browser to login page
     Open Browser    ${URL}    ${BROWSER}
     Set Window Size    1024    768
-    Title Should Be    demoapp
+    Title Should Be    Demoapp
 	
 	
 *** Test Cases ***
