@@ -2,6 +2,10 @@ FROM ubuntu:xenial-20160525
 
 LABEL name="Docker image for the Robot Framework Selenium environment with Chrome and Xvfb"
 
+
+ARG user=jenkins
+ARG uid=1001
+
 ENV UBUNTU_FLAVOR="xenial" \
     UBUNTU_DATE="20160525"
 
@@ -27,6 +31,10 @@ RUN apt-get update -qqy \
   && rm -rf /var/lib/apt/lists/* \
   && sed -i 's/securerandom\.source=file:\/dev\/random/securerandom\.source=file:\/dev\/urandom/' ./usr/lib/jvm/java-8-openjdk-amd64/jre/lib/security/java.security
 
+  
+RUN  useradd -d "$JENKINS_HOME" -u ${uid} -g ${wheel} -m -s /bin/bash ${user}  
+  
+  
 #===================
 # Timezone settings
 #===================
@@ -103,5 +111,6 @@ RUN chmod +x /usr/local/bin/run.sh
 
 VOLUME /robot
 
+USER ${user}
 
 CMD ["run.sh"]
