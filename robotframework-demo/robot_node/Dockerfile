@@ -32,7 +32,7 @@ RUN apt-get update -qqy \
   && sed -i 's/securerandom\.source=file:\/dev\/random/securerandom\.source=file:\/dev\/urandom/' ./usr/lib/jvm/java-8-openjdk-amd64/jre/lib/security/java.security
 
   
-RUN  useradd -d "$JENKINS_HOME" -u ${uid} -g ${wheel} -m -s /bin/bash ${user}  
+RUN  useradd -u ${uid} -g sudo -m -s /bin/bash ${user}  
   
   
 #===================
