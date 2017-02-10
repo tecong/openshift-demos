@@ -111,6 +111,4 @@ RUN chmod +x /usr/local/bin/run.sh
 
 VOLUME /robot
 
-USER ${user}
-
 CMD ["run.sh"]

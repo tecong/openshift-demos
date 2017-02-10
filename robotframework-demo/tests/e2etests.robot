@@ -3,7 +3,7 @@ Library           robot.libraries.Collections._List
 Library           Selenium2Library
 
 *** Variables ***
-${BROWSER}        Firefox
+${BROWSER}        GoogleChrome
 ${URL}			http://testiapp-demoapp-test.cloudapps.ocp-teco.teco.prd.a.tecdomain.net/#/
 ${USERNAME_A}       admin
 ${PWD_A}		    admin
