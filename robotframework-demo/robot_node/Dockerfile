@@ -4,7 +4,7 @@ LABEL name="Docker image for the Robot Framework Selenium environment with Chrom
 
 
 ARG user=jenkins
-ARG uid=1001
+ARG uid=995
 
 ENV UBUNTU_FLAVOR="xenial" \
     UBUNTU_DATE="20160525"
