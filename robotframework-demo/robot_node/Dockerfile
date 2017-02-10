@@ -46,7 +46,7 @@ RUN echo "Setting time zone to '${TZ}'" \
 #==========
 # Selenium
 #==========
-ENV SELENIUM_SERVER_VERSION 2.53
+ENV SELENIUM_SERVER_VERSION 3.0
 RUN mkdir -p /opt/selenium \
   && wget --no-verbose \
     https://selenium-release.storage.googleapis.com/${SELENIUM_SERVER_VERSION}/selenium-server-standalone-${SELENIUM_SERVER_VERSION}.0.jar \
@@ -75,7 +75,7 @@ RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key
 #==================
 # Chrome webdriver
 #==================
-ENV CHROME_DRIVER_VERSION 2.25
+ENV CHROME_DRIVER_VERSION 2.27
 RUN wget --no-verbose -O /tmp/chromedriver_linux64.zip https://chromedriver.storage.googleapis.com/$CHROME_DRIVER_VERSION/chromedriver_linux64.zip \
   && rm -rf /opt/selenium/chromedriver \
   && unzip /tmp/chromedriver_linux64.zip -d /opt/selenium \
@@ -101,7 +101,7 @@ RUN apt-get update -qqy \
 RUN pip install --upgrade pip
 RUN pip install requests==2.9.1
 RUN pip install robotframework==3.0
-RUN pip install robotframework-selenium2library==1.7.4
+RUN pip install robotframework-selenium2library==1.8.0
 RUN pip install robotframework-httplibrary==0.4.2
 RUN pip install robotframework-requests==0.4.5
 RUN pip install robotframework-pabot==0.23
@@ -111,4 +111,3 @@ RUN chmod +x /usr/local/bin/run.sh
 
 VOLUME /robot
 
-CMD ["run.sh"]
