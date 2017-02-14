@@ -100,7 +100,7 @@ node {
    stage ('run e2e robot tests') {
 // wait a bit until test server is up
         sleep 15
-        sh 'mkdir robotframework-demo/tests/results'
+        sh 'rm -rf robotframework-demo/tests/results; mkdir robotframework-demo/tests/results'
         docker.withServer('tcp://127.0.0.1:4243')  {
                docker.image('demoapp-test/robotfw:1.1').inside('--privileged=true -v $WORKSPACE/robotframework-demo/tests:/robot') {
                     sh 'export ROBOT_TESTS=/robot/e2etests.robot; run.sh'
