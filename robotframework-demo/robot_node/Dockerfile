@@ -2,6 +2,10 @@ FROM ubuntu:xenial-20160525
 
 LABEL name="Docker image for the Robot Framework Selenium environment with Chrome and Xvfb"
 
+
+ARG user=jenkins
+ARG uid=995
+
 ENV UBUNTU_FLAVOR="xenial" \
     UBUNTU_DATE="20160525"
 
@@ -27,6 +31,10 @@ RUN apt-get update -qqy \
   && rm -rf /var/lib/apt/lists/* \
   && sed -i 's/securerandom\.source=file:\/dev\/random/securerandom\.source=file:\/dev\/urandom/' ./usr/lib/jvm/java-8-openjdk-amd64/jre/lib/security/java.security
 
+  
+RUN  useradd -u ${uid} -g sudo -m -s /bin/bash ${user}  
+  
+  
 #===================
 # Timezone settings
 #===================
@@ -38,7 +46,7 @@ RUN echo "Setting time zone to '${TZ}'" \
 #==========
 # Selenium
 #==========
-ENV SELENIUM_SERVER_VERSION 2.53
+ENV SELENIUM_SERVER_VERSION 3.0
 RUN mkdir -p /opt/selenium \
   && wget --no-verbose \
     https://selenium-release.storage.googleapis.com/${SELENIUM_SERVER_VERSION}/selenium-server-standalone-${SELENIUM_SERVER_VERSION}.0.jar \
@@ -49,9 +57,10 @@ RUN mkdir -p /opt/selenium \
 #==============
 RUN apt-get update -qqy \
   && apt-get -qqy install \
-    xvfb \
-  && rm -rf /var/lib/apt/lists/*
-
+    xvfb x11vnc \
+  && rm -rf /var/lib/apt/lists/* \
+  && mkdir ~/.vnc/ && x11vnc -storepasswd 123456 ~/.vnc/passwd
+  
 #===============
 # Google Chrome
 #===============
@@ -66,7 +75,7 @@ RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key
 #==================
 # Chrome webdriver
 #==================
-ENV CHROME_DRIVER_VERSION 2.25
+ENV CHROME_DRIVER_VERSION 2.27
 RUN wget --no-verbose -O /tmp/chromedriver_linux64.zip https://chromedriver.storage.googleapis.com/$CHROME_DRIVER_VERSION/chromedriver_linux64.zip \
   && rm -rf /opt/selenium/chromedriver \
   && unzip /tmp/chromedriver_linux64.zip -d /opt/selenium \
@@ -92,12 +101,13 @@ RUN apt-get update -qqy \
 RUN pip install --upgrade pip
 RUN pip install requests==2.9.1
 RUN pip install robotframework==3.0
-RUN pip install robotframework-selenium2library==1.7.4
+RUN pip install robotframework-selenium2library==1.8.0
 RUN pip install robotframework-httplibrary==0.4.2
 RUN pip install robotframework-requests==0.4.5
 RUN pip install robotframework-pabot==0.23
 
-ADD run.sh /usr/local/bin/run.sh
-RUN chmod +x /usr/local/bin/run.sh
+ADD run.sh /usr/local/bin/run-robot.sh
+RUN chmod +x /usr/local/bin/run-robot.sh
 
-CMD ["run.sh"]
+VOLUME /robot
+
