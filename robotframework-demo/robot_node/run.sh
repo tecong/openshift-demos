@@ -36,7 +36,7 @@ else
 fi 
 
 # Execute tests
-echo -e "Executing robot tests at log level ${LOG_LEVEL}"
+echo -e "Executing robot test command: pybot --loglevel ${LOG_LEVEL} ${PARAMETERS} -d ${ROBOT_OUTPUT_DIRECTORY} ${ROBOT_TESTS}"
 
 ls -la /robot
 pybot --loglevel ${LOG_LEVEL} ${PARAMETERS} -d ${ROBOT_OUTPUT_DIRECTORY} ${ROBOT_TESTS}
