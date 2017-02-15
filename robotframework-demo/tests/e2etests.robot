@@ -30,8 +30,9 @@ BrowseLinks
     [Documentation]    Browse through the links in testsite
     [Setup]    Test Config
 
-    Open Page 
-
+    Log 	Browsing to url ${URL}
+	Open Page 
+	
 	Sleep    3s
 	Click Link   Register a new account
 	Click Link 	 sign in
