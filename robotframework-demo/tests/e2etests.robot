@@ -27,7 +27,7 @@ Open Page
 	
 *** Test Cases ***
 BrowseLinks
-    [Documentation]    Browse through the links in testsite
+    [Documentation]    Browse through the links in ${URL}
     [Setup]    Test Config
 
     Log 	Browsing to url ${URL}

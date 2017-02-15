@@ -103,7 +103,7 @@ node {
         sh 'rm -rf robotframework-demo/tests/results; mkdir robotframework-demo/tests/results'
         docker.withServer('tcp://127.0.0.1:4243')  {
                docker.image('demoapp-test/robotfw:1.1').inside('--privileged=true -v $WORKSPACE/robotframework-demo/tests:/robot') {
-                    sh 'export ROBOT_TESTS=/robot/e2etests.robot; run.sh'
+                    sh 'export ROBOT_TESTS=/robot/e2etests.robot; export PARAMETERS=" -V /robot/test-env.py"; run-robot.sh'
                 }  
                 sh 'docker logs $(docker ps -a | grep robot | head -1 | cut -d \' \' -f 1)'
 //                step([$class: 'ArtifactArchiver', artifacts: '**/robotframework-demo/tests/results/*', fingerprint: true])
