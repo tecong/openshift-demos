@@ -106,8 +106,8 @@ RUN pip install robotframework-httplibrary==0.4.2
 RUN pip install robotframework-requests==0.4.5
 RUN pip install robotframework-pabot==0.23
 
-ADD run.sh /usr/local/bin/run.sh
-RUN chmod +x /usr/local/bin/run.sh
+ADD run.sh /usr/local/bin/run-robot.sh
+RUN chmod +x /usr/local/bin/run-robot.sh
 
 VOLUME /robot
 
