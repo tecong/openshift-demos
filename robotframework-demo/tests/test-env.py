@@ -1,3 +1,3 @@
-URL = 'http://testiapp-demoapp-test.cloudapps.ocp-teco.teco.prd.a.tecdomain.net/#/'
+URL = 'http://demoapp-test.cloudapps.ocp-test34.teco.prd.a.tecdomain.net/#/'
 USERNAME_A = 'admin'
 PWD_A = 'admin'
