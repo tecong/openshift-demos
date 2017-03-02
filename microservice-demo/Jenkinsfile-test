@@ -99,14 +99,15 @@ node {
 
    stage ('run e2e robot tests') {
 // wait a bit until test server is up
-        sleep 60
-        sh 'rm -rf robotframework-demo/tests/results; mkdir robotframework-demo/tests/results'
-        docker.withServer('tcp://127.0.0.1:4243')  {
+     sleep 60
+     retry(3) { 
+        try {    
+         sh 'rm -rf robotframework-demo/tests/results; mkdir robotframework-demo/tests/results'
+         docker.withServer('tcp://127.0.0.1:4243')  {
                docker.image('demoapp-test/robotfw:1.1').inside('--privileged=true -v $WORKSPACE/robotframework-demo/tests:/robot') {
                     sh 'export ROBOT_TESTS=/robot/e2etests.robot; export PARAMETERS=" -V /robot/test-env.py"; run-robot.sh'
                 }  
                 sh 'docker logs $(docker ps -a | grep robot | head -1 | cut -d \' \' -f 1)'
-//                step([$class: 'ArtifactArchiver', artifacts: '**/robotframework-demo/tests/results/*', fingerprint: true])
                 
                 step([$class: 'RobotPublisher',
                     disableArchiveOutput: false,
@@ -117,9 +118,15 @@ node {
                     passThreshold: 100,
                     reportFileName: 'report.html',
                     unstableThreshold: 0]);
+		      }    
+		 } catch(error){
+			input "Rerun tests ?"
+			false
+	     }        		
         }
-    }
-   
+  }
+ 
+	
   stage('Install to UAT') {
     input message: 'Do you want to install this build to UAT env?', ok: 'Install to UAT'
     docker.withRegistry('https://docker-registry-default.cloudapps.ocp-test34.teco.prd.a.tecdomain.net', 'demoapp-test') {
