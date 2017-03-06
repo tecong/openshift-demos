@@ -100,22 +100,13 @@ node {
    stage ('run in Test: e2e robot tests') {
 // wait a bit until test server is up
      sleep 60
-         sh 'rm -rf robotframework-demo/tests/results; mkdir robotframework-demo/tests/results'
+         sh 'rm -rf robotframework-demo/tests/results*'
          docker.withServer('tcp://127.0.0.1:4243')  {
                docker.image('demoapp-test/robotfw:1.1').inside('--privileged=true -v $WORKSPACE/robotframework-demo/tests:/robot') {
-                    sh 'export ROBOT_TESTS=/robot/e2etests.robot; export ROBOT_OUTPUT_DIRECTORY=/robot/results-test; export PARAMETERS=" -V /robot/test-env.py"; run-robot.sh'
+                    sh 'export ROBOT_TESTS=/robot/e2etests.robot; export ROBOT_OUTPUT_DIRECTORY=/robot/results-test; export PARAMETERS=" -V /robot/test-env.py -N E2E_testrun_in_TEST"; run-robot.sh'
                 }  
                 sh 'docker logs $(docker ps -a | grep robot | head -1 | cut -d \' \' -f 1)'
                 
-                step([$class: 'RobotPublisher',
-                    disableArchiveOutput: false,
-                    outputPath: 'robotframework-demo/tests/results-test',
-                    logFileName: 'log.html',
-                    otherFiles: '',
-                    outputFileName: 'output.xml',
-                    passThreshold: 100,
-                    reportFileName: 'report.html',
-                    unstableThreshold: 0]);
 		 }    
         
   }
@@ -136,16 +127,16 @@ node {
   stage ('run in Test: e2e robot tests') {
 // wait a bit until uat server is up
          sleep 60
-         sh 'rm -rf robotframework-demo/tests/results; mkdir robotframework-demo/tests/results'
+		 // run the UAT tests and concatenate it to TEST env results. Publish this robot result.
          docker.withServer('tcp://127.0.0.1:4243')  {
                docker.image('demoapp-test/robotfw:1.1').inside('--privileged=true -v $WORKSPACE/robotframework-demo/tests:/robot') {
-                    sh 'export ROBOT_TESTS=/robot/e2etests.robot; export ROBOT_OUTPUT_DIRECTORY=/robot/results-uat;  export PARAMETERS=" -V /robot/uat-env.py"; run-robot.sh'
+                    sh 'export ROBOT_TESTS=/robot/e2etests.robot; export ROBOT_OUTPUT_DIRECTORY=/robot/results-uat;  export PARAMETERS=" -V /robot/uat-env.py -N E2E_testrun_in_UAT"; run-robot.sh; rebot --outputdir /robot/all-results --output output.xml /robot/results-test/output.xml /robot/results-uat/output.xml'
                 }  
                 sh 'docker logs $(docker ps -a | grep robot | head -1 | cut -d \' \' -f 1)'
                 
                 step([$class: 'RobotPublisher',
                     disableArchiveOutput: false,
-                    outputPath: 'robotframework-demo/tests/results-uat',
+                    outputPath: 'robotframework-demo/tests/all-results',
                     logFileName: 'log.html',
                     otherFiles: '',
                     outputFileName: 'output.xml',
