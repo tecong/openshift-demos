@@ -4,9 +4,6 @@ Library           Selenium2Library
 
 *** Variables ***
 ${BROWSER}        GoogleChrome
-#${URL}			http://demoapp-test.cloudapps.ocp-test34.teco.prd.a.tecdomain.net/#/
-#${USERNAME_A}       admin
-#${PWD_A}		    admin
 ${USERNAME_U}       user
 ${PWD_U}		    user
 
@@ -22,6 +19,8 @@ Open Page
     [Documentation]    Opens browser to login page
     Open Browser    ${URL}    ${BROWSER}
     Set Window Size    1024    768 
+	Reload Page 
+	Sleep    2s	
 
 	
 *** Test Cases ***
@@ -32,8 +31,9 @@ BrowseLinks
     Log 	Browsing to url ${URL}
 	Open Page 
 	
-	Sleep    5s
 	Click Link   Register a new account
+# have to reload here because otherwise random failures becasue of stale element 
+	Reload Page   
 	Click Link 	 sign in
 	
 #    Input Text    xpath=//input[@id='password']   ${USERNAME_A}    
@@ -50,7 +50,6 @@ SignInPage
     [Setup]    Test Config
 
     Open Page
-	Sleep    5s	
 	Click Link	sign in
 	
 #    Input Text    xpath=//input[@id='password']   ${USERNAME_A}    
@@ -66,7 +65,6 @@ RegistrationPage
     [Setup]    Test Config
 
     Open Page 
-	Sleep    5s
 	Click Link   Register a new account
 	
 #	 Wait Until Element Is Visible    //h1[.='Registration']
